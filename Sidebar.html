@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <base target="_top">
+    <script>
+      document.addEventListener('DOMContentLoaded', () => {
+        const openLinkButton = document.getElementById('openLinkButton');
+        const updateButton = document.getElementById('updateButton');
+        const messageBox = document.getElementById('message');
+        const originalValueDisplay = document.getElementById('originalValueDisplay');
+
+        // Function to update the UI with data from the server
+        const updateUI = () => {
+          originalValueDisplay.textContent = 'Loading...';
+          google.script.run
+            .withSuccessHandler(data => {
+              if (data && data.originalValue) {
+                originalValueDisplay.textContent = 'Phone Number: ' + data.originalValue;
+                // Re-assign the click listener for the main button
+                openLinkButton.onclick = () => {
+                  window.open(data.concatenatedUrl, '_blank');
+                  messageBox.textContent = 'Link opened successfully!';
+                };
+              } else {
+                originalValueDisplay.textContent = 'Please select a cell with text.';
+                openLinkButton.onclick = null; // Clear the click handler if no data
+              }
+            })
+            .getConcatenatedUrl();
+        };
+
+        // Initial load of the data
+        updateUI();
+
+        // Add click listener to the new "Update phone" button
+        updateButton.addEventListener('click', () => {
+          messageBox.textContent = ''; // Clear previous messages
+          updateUI();
+        });
+      });
+    </script>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        padding: 1.5rem;
+        background-color: #f8f9fa; /* Lighter background */
+        color: #202124;
+        display: flex;
+        flex-direction: column;
+        gap: 1.5rem;
+        height: 100vh;
+      }
+      button {
+        width: 100%;
+        padding: 0.875rem; /* Slightly larger padding */
+        font-size: 1rem;
+        background-color: #4285F4;
+        color: white;
+        border: none;
+        border-radius: 0.5rem;
+        cursor: pointer;
+        box-shadow: 0 1px 2px 0 rgba(60,64,67,0.3), 0 1px 3px 1px rgba(60,64,67,0.15);
+        transition: background-color 0.3s ease;
+      }
+      button:hover {
+        background-color: #357ae8;
+        box-shadow: 0 1px 3px 0 rgba(60,64,67,0.3), 0 4px 8px 3px rgba(60,64,67,0.15);
+      }
+      #originalValueDisplay {
+        font-size: 1rem;
+        font-weight: bold;
+        text-align: center;
+        margin-bottom: 0.5rem;
+        padding: 0.5rem;
+        border-radius: 0.5rem;
+        background-color: #e8f0fe;
+        color: #1a73e8;
+      }
+      #message {
+        text-align: center;
+        color: #555;
+        font-size: 0.9rem;
+      }
+    </style>
+  </head>
+  <body>
+    <p id="originalValueDisplay">Loading...</p>
+    <button id="openLinkButton">Call now</button>
+    <button id="updateButton">Update phone</button>
+    <div id="message"></div>
+  </body>
+</html>
